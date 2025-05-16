@@ -2,12 +2,17 @@
 import { AxiosError } from 'axios';
 
 // Core Imports
-import type { TRouteConfig, TTrafficResponse } from './core/types';
 import { METRICS } from './core/constants';
 import {
   generateDelayMessage,
   googleMapsDirections,
+  sendNotificationToCustomer,
 } from './core/services/api';
+import type {
+  TNotificationConfig,
+  TRouteConfig,
+  TTrafficResponse,
+} from './core/types';
 
 // Mock traffic response for fallback
 const mockTrafficResponse = (
@@ -98,6 +103,42 @@ export const ACTIVITIES = {
       console.error('OpenAI API error:', error);
 
       return fallbackMessage;
+    }
+  },
+
+  // Sends SMS via Twilio or mocks response
+  async sendNotification(message: string, config: TNotificationConfig) {
+    const { twilioSid, twilioAuthToken, twilioPhoneNumber, phoneNumber } =
+      config;
+
+    try {
+      if (!twilioSid || !twilioAuthToken || !twilioPhoneNumber) {
+        console.warn(`Twilio Credentials missing`);
+        console.log(`Mock SMS: ${message}`);
+        METRICS.notificationAttempts.inc({ status: 'mocked' });
+
+        return false;
+      }
+
+      // Send notification to the customer
+      await sendNotificationToCustomer(
+        twilioSid,
+        twilioAuthToken,
+        twilioPhoneNumber,
+        phoneNumber,
+        message
+      );
+
+      METRICS.notificationAttempts.inc({ status: 'success' });
+      console.log('SMS sent successfully');
+
+      return true;
+    } catch (error) {
+      METRICS.notificationAttempts.inc({ status: 'failed' });
+      console.error('Twilio API error:', error);
+      console.log(`Mock SMS: ${message}`);
+
+      return false;
     }
   },
 } as const;

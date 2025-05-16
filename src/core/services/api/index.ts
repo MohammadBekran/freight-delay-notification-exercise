@@ -1,5 +1,7 @@
+// Third-Party Imports
 import axios from 'axios';
 import OpenAI from 'openai';
+import twilio from 'twilio';
 
 // Google Maps Directions API call handler
 export const googleMapsDirections = async (
@@ -52,5 +54,25 @@ export const generateDelayMessage = async (
     console.error('OpenAI API error:', error);
 
     throw error;
+  }
+};
+
+// Twilio send SMS API handler
+export const sendNotificationToCustomer = async (
+  twilioSid: string,
+  twilioAuthToken: string,
+  twilioPhoneNumber: string,
+  phoneNumber: string,
+  message: string
+): Promise<void> => {
+  try {
+    const client = twilio(twilioSid, twilioAuthToken);
+    await client.messages.create({
+      body: message,
+      from: twilioPhoneNumber,
+      to: phoneNumber,
+    });
+  } catch (error) {
+    console.error('Twilio API error:', error);
   }
 };

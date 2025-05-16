@@ -1,8 +1,7 @@
-// Core Imports
+// Third-Party Imports
 import { Counter } from 'prom-client';
-import type { TMetricData } from '../types';
 
-export const METRICS: TMetricData = {
+export const METRICS = {
   trafficApiCalls: new Counter({
     name: 'traffic_api_calls_total',
     help: 'Total number of traffic API calls',

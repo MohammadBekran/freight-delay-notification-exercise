@@ -14,8 +14,6 @@ export type TRouteConfig = z.infer<typeof RouteConfigSchema>;
 export type TNotificationConfig = z.infer<typeof NotificationConfigSchema>;
 export type TWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
-export type TMetricData = Record<string, Counter<'status'>>;
-
 export type TMetric = {
   name: string;
   help: string;
