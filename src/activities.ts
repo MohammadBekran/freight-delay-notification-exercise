@@ -4,7 +4,10 @@ import { AxiosError } from 'axios';
 // Core Imports
 import type { TRouteConfig, TTrafficResponse } from './core/types';
 import { METRICS } from './core/constants';
-import { googleMapsDirections } from './core/services/api';
+import {
+  generateDelayMessage,
+  googleMapsDirections,
+} from './core/services/api';
 
 // Mock traffic response for fallback
 const mockTrafficResponse = (
@@ -33,7 +36,7 @@ export const ACTIVITIES = {
       const origin = encodeURIComponent(configOrigin);
       const destination = encodeURIComponent(configDestination);
 
-      const response = await googleMapsDirections(apiKey, destination);
+      const response = await googleMapsDirections(apiKey, origin, destination);
 
       METRICS.trafficApiCalls.inc({ status: 'success' });
 
@@ -69,6 +72,32 @@ export const ACTIVITIES = {
       console.warn(`Traffic API error ${message}`);
 
       return mockTrafficResponse(configOrigin, configDestination);
+    }
+  },
+
+  // Generates a delay message using OpenAI's gpt-4o-mini
+  async generateDelayMessage(
+    delayMinutes: number,
+    openAIApiKey: string
+  ): Promise<string> {
+    const fallbackMessage = `Sorry your delivery is delayed by ~${delayMinutes} min. We're working to deliver`;
+
+    try {
+      if (!openAIApiKey.startsWith('sk-')) {
+        throw new Error('Invalid OpenAI key');
+      }
+
+      const prompt = `Generate a professional SMS(max 170 chars) for a ${delayMinutes}-min freight delay. Include apology and delay time`;
+      const response = await generateDelayMessage(openAIApiKey, prompt);
+
+      const message = response?.choices[0].message.content?.trim();
+      if (!message) throw new Error('Empty OpenAI response');
+
+      return message.length > 170 ? `${message.slice(1, 168)}...` : message;
+    } catch (error) {
+      console.error('OpenAI API error:', error);
+
+      return fallbackMessage;
     }
   },
 } as const;

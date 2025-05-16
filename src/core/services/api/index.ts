@@ -1,7 +1,10 @@
 import axios from 'axios';
+import OpenAI from 'openai';
 
+// Google Maps Directions API call handler
 export const googleMapsDirections = async (
   key: string,
+  origin: string,
   destination: string
 ) => {
   try {
@@ -21,6 +24,33 @@ export const googleMapsDirections = async (
 
     return response.data;
   } catch (error) {
+    console.error(`Google Maps Directions Error:`, error);
+
+    throw error;
+  }
+};
+
+// API Handler for generating friendly & delay-related message for the customer using OpenAI's gpt-4o-mini
+export const generateDelayMessage = async (
+  openAIApiKey: string,
+  prompt: string
+): Promise<OpenAI.Chat.Completions.ChatCompletion> => {
+  try {
+    const openai = new OpenAI({
+      apiKey: openAIApiKey,
+    });
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      max_completion_tokens: 50,
+      temperature: 0.8,
+    });
+
+    return response;
+  } catch (error) {
+    console.error('OpenAI API error:', error);
+
     throw error;
   }
 };
