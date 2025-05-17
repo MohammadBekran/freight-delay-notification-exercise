@@ -1,6 +1,5 @@
 // Third-Party Imports
 import { z } from 'zod';
-import { Counter } from 'prom-client';
 
 // Core Imports
 import {

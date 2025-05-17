@@ -11,7 +11,7 @@ export const googleMapsDirections = async (
 ) => {
   try {
     const response = await axios.get(
-      'maps.googleapis.comm/maps/api/directions/json',
+      'maps.googleapis.com/maps/api/directions/json',
       {
         params: {
           key,

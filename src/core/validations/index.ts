@@ -9,12 +9,12 @@ export const RouteConfigSchema = z.object({
 });
 
 export const NotificationConfigSchema = z.object({
-  phoneNumber: z.string().regex(/^\+\d{10, 15}$/, 'Invalid phone number'),
+  phoneNumber: z.string().regex(/^\+\d{10,15}$/, 'Invalid phone number'),
   twilioSid: z.string().min(1).optional(),
   twilioAuthToken: z.string().min(1).optional(),
   twilioPhoneNumber: z
     .string()
-    .regex(/^\+\d{10, 15}$/)
+    .regex(/^\+\d{10,15}$/)
     .optional(),
 });
 
@@ -24,5 +24,5 @@ export const WorkflowInputSchema = z.object({
   openAIApiKey: z.string().min(1, 'OpenAI API key is required'),
   delayThresholdMinuted: z
     .number()
-    .min(0, 'Delay threshold muse be non-negetive'),
+    .min(0, 'Delay threshold muse be non-negative'),
 });
