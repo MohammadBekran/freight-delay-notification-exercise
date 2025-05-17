@@ -17,7 +17,8 @@ A robust TypeScript application leveraging Temporal.io workflows to monitor frei
 
 ## 🛠️ Prerequisites
 
-- Node.js v16+
+- Node.js v22+
+- PNPM v10+
 - Temporal server (local or remote)
 - API keys:
   - Google Maps Platform
