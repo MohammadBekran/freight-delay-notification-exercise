@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 // Core Imports
 import {
+  EnvSchema,
   NotificationConfigSchema,
   RouteConfigSchema,
   WorkflowInputSchema,
@@ -32,3 +33,5 @@ export type TWorkflowResult = {
   delayMinutes: number;
   message?: string;
 };
+
+export type TEnvConfig = z.infer<typeof EnvSchema>;

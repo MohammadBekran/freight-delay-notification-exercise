@@ -24,7 +24,7 @@ export const freightDelayWorkflow = async (
     routeConfig,
     notificationConfig,
     openAIApiKey,
-    delayThresholdMinuted,
+    delayThresholdMinutes,
   } = input;
 
   // Step 1: Fetch traffic data
@@ -35,7 +35,7 @@ export const freightDelayWorkflow = async (
   console.log(`Estimated delay: ${delayMinutes} minutes`);
 
   // Step 2: Check delay threshold
-  if (delayMinutes <= delayThresholdMinuted) {
+  if (delayMinutes <= delayThresholdMinutes) {
     console.log('Delay within limits, no notification needed');
 
     return {

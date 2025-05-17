@@ -22,7 +22,19 @@ export const WorkflowInputSchema = z.object({
   routeConfig: RouteConfigSchema,
   notificationConfig: NotificationConfigSchema,
   openAIApiKey: z.string().min(1, 'OpenAI API key is required'),
-  delayThresholdMinuted: z
+  delayThresholdMinutes: z
     .number()
     .min(0, 'Delay threshold muse be non-negative'),
+});
+
+export const EnvSchema = z.object({
+  ORIGIN: z.string().min(1),
+  DESTINATION: z.string().min(1),
+  GOOGLE_MAPS_API_KEY: z.string().min(1),
+  CUSTOMER_PHONE: z.string().regex(/^\+\d{10,15}$/, 'Invalid phone number'),
+  TWILIO_SID: z.string().min(1),
+  TWILIO_AUTH_TOKEN: z.string().min(1),
+  TWILIO_PHONE: z.string().regex(/^\+\d{10,15}$/, 'Invalid phone number'),
+  OPENAI_API_KEY: z.string().min(1),
+  DELAY_THRESHOLD: z.string().transform(Number),
 });

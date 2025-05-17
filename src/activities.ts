@@ -4,7 +4,7 @@ import { AxiosError } from 'axios';
 // Core Imports
 import { METRICS } from './core/constants';
 import {
-  generateDelayMessage,
+  generateFriendlyDelayMessage,
   googleMapsDirections,
   sendNotificationToCustomer,
 } from './core/services/api';
@@ -28,6 +28,7 @@ const mockTrafficResponse = (
   };
 };
 
+// Activities for the workflow
 export const ACTIVITIES = {
   // Fetches traffic data from Google Maps Directions API (free tier)
   async getTrafficData(config: TRouteConfig): Promise<TTrafficResponse> {
@@ -93,7 +94,7 @@ export const ACTIVITIES = {
       }
 
       const prompt = `Generate a professional SMS(max 170 chars) for a ${delayMinutes}-min freight delay. Include apology and delay time`;
-      const response = await generateDelayMessage(openAIApiKey, prompt);
+      const response = await generateFriendlyDelayMessage(openAIApiKey, prompt);
 
       const message = response?.choices[0].message.content?.trim();
       if (!message) throw new Error('Empty OpenAI response');

@@ -5,18 +5,23 @@ import { config } from 'dotenv';
 
 // Core Imports
 import type { TWorkflowInput, TWorkflowResult } from './core/types';
+import { validateEnv } from './core/utils';
 import { WorkflowInputSchema } from './core/validations';
 import { freightDelayWorkflow } from './workflow';
 
 config();
 
+const env = validateEnv();
+
 const startWorkflow = async (
   input: TWorkflowInput
 ): Promise<TWorkflowResult | undefined> => {
-  try {
-    WorkflowInputSchema.safeParse(input);
-  } catch (error) {
-    console.error(`Invalid workflow input:`, error);
+  const validatedInputResult = WorkflowInputSchema.safeParse(input);
+  if (!validatedInputResult.success) {
+    const errorMessage = 'Invalid workflow input';
+
+    console.error(errorMessage);
+    throw new Error(errorMessage);
   }
 
   const client = new Client();
@@ -38,22 +43,22 @@ const startWorkflow = async (
   }
 };
 
-// Main function
+// Main function to execute the workflow
 const main = async () => {
   const input: TWorkflowInput = {
     routeConfig: {
-      origin: process.env.ORIGIN!,
-      destination: process.env.DESTINATION!,
-      apiKey: process.env.GOOGLE_MAPS_API_KEY!,
+      origin: env.ORIGIN,
+      destination: env.DESTINATION,
+      apiKey: env.GOOGLE_MAPS_API_KEY,
     },
     notificationConfig: {
-      phoneNumber: process.env.CUSTOMER_PHONE!,
-      twilioSid: process.env.TWILIO_SID!,
-      twilioAuthToken: process.env.TWILIO_AUTH_TOKEN!,
-      twilioPhoneNumber: process.env.TWILIO_PHONE!,
+      phoneNumber: env.CUSTOMER_PHONE,
+      twilioSid: env.TWILIO_SID,
+      twilioAuthToken: env.TWILIO_AUTH_TOKEN,
+      twilioPhoneNumber: env.TWILIO_PHONE,
     },
-    openAIApiKey: process.env.OPENAI_API_KEY!,
-    delayThresholdMinuted: +process.env.DELAY_THRESHOLD!,
+    openAIApiKey: env.OPENAI_API_KEY,
+    delayThresholdMinutes: env.DELAY_THRESHOLD,
   };
 
   try {
