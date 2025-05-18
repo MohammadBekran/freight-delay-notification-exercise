@@ -38,7 +38,6 @@ export const mapboxDirections = async (
           overview: 'full',
           steps: true,
         },
-        timeout: 10000,
       }
     );
 
