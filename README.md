@@ -64,6 +64,7 @@ src/
 │   ├── utils/        # Utilities
 │   └── validations/  # Input schemas
 ├── activities.ts     # Temporal activities
+├── worker.ts       # Temporal worker
 ├── workflow.ts       # Main workflow
 └── index.ts         # Entry point
 ```
