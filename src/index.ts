@@ -59,13 +59,7 @@ const main = async () => {
     routeConfig: {
       origin: env.ORIGIN,
       destination: env.DESTINATION,
-      apiKey: env.GOOGLE_MAPS_API_KEY,
-    },
-    notificationConfig: {
-      phoneNumber: env.CUSTOMER_PHONE,
-      twilioSid: env.TWILIO_SID,
-      twilioAuthToken: env.TWILIO_AUTH_TOKEN,
-      twilioPhoneNumber: env.TWILIO_PHONE,
+      accessToken: env.MAPBOX_ACCESS_TOKEN,
     },
     openAIApiKey: env.OPENAI_API_KEY,
     delayThresholdMinutes: env.DELAY_THRESHOLD,

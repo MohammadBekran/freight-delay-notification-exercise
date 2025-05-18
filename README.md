@@ -4,13 +4,12 @@
 [![Temporal.io](https://img.shields.io/badge/Temporal.io-1.11.8-orange.svg)](https://temporal.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A robust TypeScript application leveraging Temporal.io workflows to monitor freight delays and send automated notifications, powered by Google Maps, OpenAI, and Twilio.
+A robust TypeScript application leveraging Temporal.io workflows to monitor freight delays and send automated notifications, powered by Mapbox, OpenAI.
 
 ## 🚀 Features
 
-- 🗺️ Traffic monitoring (Google Maps API)
+- 🗺️ Traffic monitoring (Mapbox API)
 - 🤖 AI-powered delay notifications (OpenAI)
-- 📱 SMS notifications (Twilio)
 - ⚡ Fault-tolerant workflows (Temporal.io)
 - 🔒 Type-safe environment validation
 - 📊 Comprehensive metrics tracking
@@ -21,9 +20,8 @@ A robust TypeScript application leveraging Temporal.io workflows to monitor frei
 - PNPM v10+
 - Temporal server (local or remote)
 - API keys:
-  - Google Maps Platform
+  - Mapbox
   - OpenAI
-  - Twilio
 
 ## 📦 Installation
 
@@ -41,19 +39,13 @@ Create `.env` in project root:
 # Application Configuration
 DELAY_THRESHOLD= # Delay threshold in minutes
 
-# Google Maps API Configuration
-GOOGLE_MAPS_API_KEY= # Required for calling Google Maps Directions API
+# Mapbox API Configuration
+MAPBOX_ACCESS_TOKEN= # Required for calling Mapbox API
 DESTINATION= # e.g. Milwaukee
 ORIGIN= # e.g. Chicago
 
 # OpenAI API Configuration
 OPENAI_API_KEY= # Required for calling OpenAI API
-
-# Twilio API Configuration
-TWILIO_SID= # Required for calling Twilio API
-TWILIO_AUTH_TOKEN= # Required for calling Twilio API
-TWILIO_PHONE= # Your Twilio phone number with country code
-CUSTOMER_PHONE= # Customer's phone number with country code
 
 # Temporal Configuration
 TEMPORAL_API_KEY= # Required for using Temporal
@@ -77,6 +69,12 @@ src/
 ```
 
 ## 🚦 Usage
+
+Run worker:
+
+```bash
+pnpm run worker
+```
 
 Run workflow:
 
@@ -115,8 +113,7 @@ MIT © Mohammad Bekran
 
 - [Temporal.io](https://temporal.io)
 - [OpenAI](https://openai.com)
-- [Twilio](https://twilio.com)
-- [Google Maps Platform](https://cloud.google.com/maps-platform)
+- [Mapbox](https://www.mapbox.com/)
 
 ---
 

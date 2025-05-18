@@ -4,14 +4,12 @@ import { z } from 'zod';
 // Core Imports
 import {
   EnvSchema,
-  NotificationConfigSchema,
   RouteConfigSchema,
   WorkflowInputSchema,
 } from '../validations';
 
 // Types for configurations
 export type TRouteConfig = z.infer<typeof RouteConfigSchema>;
-export type TNotificationConfig = z.infer<typeof NotificationConfigSchema>;
 export type TWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
 export type TMetric = {
@@ -24,6 +22,20 @@ export type TTrafficResponse = {
   duration: number;
   durationInTraffic: number;
   distance: number;
+};
+
+export type TMapboxResponse = {
+  routes: {
+    weight_name: string;
+    weight: number;
+    duration: number;
+    distance: number;
+    legs: [];
+    geometry: [];
+  }[];
+  waypoints: { distance: 0; name: 'West Madison Street'; location: [] }[];
+  code: string;
+  uuid: string;
 };
 
 export type TWorkflowStatus = 'sent' | 'failed' | 'skipped';

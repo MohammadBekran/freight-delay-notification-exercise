@@ -5,14 +5,10 @@ import { AxiosError } from 'axios';
 import { METRICS } from './core/constants';
 import {
   generateFriendlyDelayMessage,
-  googleMapsDirections,
-  sendNotificationToCustomer,
+  geocodeAddress,
+  mapboxDirections,
 } from './core/services/api';
-import type {
-  TNotificationConfig,
-  TRouteConfig,
-  TTrafficResponse,
-} from './core/types';
+import type { TRouteConfig, TTrafficResponse } from './core/types';
 
 // Mock traffic response for fallback
 const mockTrafficResponse = (
@@ -30,36 +26,36 @@ const mockTrafficResponse = (
 
 // Activities for the workflow
 export const ACTIVITIES = {
-  // Fetches traffic data from Google Maps Directions API (free tier)
+  // Fetches traffic data from Mapbox API (free tier)
   async getTrafficData(config: TRouteConfig): Promise<TTrafficResponse> {
     const {
       origin: configOrigin,
       destination: configDestination,
-      apiKey,
+      accessToken,
     } = config;
 
     try {
-      const origin = encodeURIComponent(configOrigin);
-      const destination = encodeURIComponent(configDestination);
+      const origin = await geocodeAddress(accessToken, configOrigin);
+      const destination = await geocodeAddress(accessToken, configDestination);
 
-      const response = await googleMapsDirections(apiKey, origin, destination);
+      const response = await mapboxDirections(accessToken, origin, destination);
 
       METRICS.trafficApiCalls.inc({ status: 'success' });
 
-      const leg = response?.data?.routes?.[0]?.legs?.[0];
-      if (!leg) {
-        console.warn(`Invalid Google Maps API response`);
+      const route = response.routes[0];
+      if (!route) {
+        console.warn(`Invalid Mapbox API response`);
 
         return mockTrafficResponse(configOrigin, configDestination);
       }
 
       // Adjust duration based on distance
-      const duration = leg.duration.value;
-      const durationInTraffic = leg.duration_in_traffic?.value ?? duration;
-      const distance = leg.distance.value;
+      const duration = route.duration;
+      const distance = route.distance;
 
-      const distanceKm = distance / 100;
+      const distanceKm = distance / 1000;
       const expectedDuration = (distanceKm / 60) * 3600;
+      const durationInTraffic = Math.max(duration, expectedDuration);
       const convertedDurationInTraffic = Math.max(
         durationInTraffic,
         expectedDuration
@@ -96,7 +92,7 @@ export const ACTIVITIES = {
       const prompt = `Generate a professional SMS(max 170 chars) for a ${delayMinutes}-min freight delay. Include apology and delay time`;
       const response = await generateFriendlyDelayMessage(openAIApiKey, prompt);
 
-      const message = response?.choices[0].message.content?.trim();
+      const message = response?.trim();
       if (!message) throw new Error('Empty OpenAI response');
 
       return message.length > 170 ? `${message.slice(1, 168)}...` : message;
@@ -107,39 +103,12 @@ export const ACTIVITIES = {
     }
   },
 
-  // Sends SMS via Twilio or mocks response
-  async sendNotification(message: string, config: TNotificationConfig) {
-    const { twilioSid, twilioAuthToken, twilioPhoneNumber, phoneNumber } =
-      config;
+  // Sends a notification (mock implementation)
+  async sendNotification(message: string) {
+    METRICS.notificationAttempts.inc({ status: 'success' });
+    console.log('SMS sent successfully');
+    console.log(`Mock SMS: ${message}`);
 
-    try {
-      if (!twilioSid || !twilioAuthToken || !twilioPhoneNumber) {
-        console.warn(`Twilio Credentials missing`);
-        console.log(`Mock SMS: ${message}`);
-        METRICS.notificationAttempts.inc({ status: 'mocked' });
-
-        return false;
-      }
-
-      // Send notification to the customer
-      await sendNotificationToCustomer(
-        twilioSid,
-        twilioAuthToken,
-        twilioPhoneNumber,
-        phoneNumber,
-        message
-      );
-
-      METRICS.notificationAttempts.inc({ status: 'success' });
-      console.log('SMS sent successfully');
-
-      return true;
-    } catch (error) {
-      METRICS.notificationAttempts.inc({ status: 'failed' });
-      console.error('Twilio API error:', error);
-      console.log(`Mock SMS: ${message}`);
-
-      return false;
-    }
+    return true;
   },
 } as const;

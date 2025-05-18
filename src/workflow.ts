@@ -20,12 +20,7 @@ export const freightDelayWorkflow = async (
   input: TWorkflowInput
 ): Promise<TWorkflowResult> => {
   console.log('Starting freight delay workflow');
-  const {
-    routeConfig,
-    notificationConfig,
-    openAIApiKey,
-    delayThresholdMinutes,
-  } = input;
+  const { routeConfig, openAIApiKey, delayThresholdMinutes } = input;
 
   // Step 1: Fetch traffic data
   const { duration, durationInTraffic } = await getTrafficData(routeConfig);
@@ -49,7 +44,7 @@ export const freightDelayWorkflow = async (
   console.log(`Generated message: ${message}`);
 
   // Step 4: Send notification
-  const sentNotification = await sendNotification(message, notificationConfig);
+  const sentNotification = await sendNotification(message);
 
   return {
     status: sentNotification ? 'sent' : 'failed',

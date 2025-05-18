@@ -1,40 +1,42 @@
 // Third-Party Imports
-import axios, { AxiosResponse } from 'axios';
-import OpenAI from 'openai';
-import twilio from 'twilio';
+import axios from 'axios';
+
+// Core Imports
+import type { TMapboxResponse } from '../../types';
 
 /**
- * Fetches real-time traffic information using Google Maps Directions API
+ * Fetches traffic information using Mabox API
  *
- * @param {string} key - Google Maps API key
- * @param {string} origin - Starting location
- * @param {string} destination - Ending location
- * @returns {Promise<AxiosResponse>}  Duration and distance information
- * @throws {Error} if API request fails or response is invalid
+ * @param {string} accessToken - Mapbox access token
+ * @param {[number, number]} origin - Starting location
+ * @param {[number, number]} destination - Ending location
+ * @returns {Promise<TMapboxResponse>}  Routes informations
+ * @throws {Error} If API request fails
  *
  * @example
- * const traffic = await googleMapsDirections(
+ * const traffic = await mapboxDirections(
  *  'api-key',
  *  'Chicago, IL',
  *  'Milwaukee, WI'
  * );
  */
 
-export const googleMapsDirections = async (
-  key: string,
-  origin: string,
-  destination: string
-): Promise<AxiosResponse> => {
+export const mapboxDirections = async (
+  accessToken: string,
+  origin: [number, number],
+  destination: [number, number]
+): Promise<TMapboxResponse> => {
   try {
-    const response = await axios.get(
-      'https://maps.googleapis.com/maps/api/directions/json',
+    const coords = `${origin.join(',')};${destination.join(',')}`;
+
+    const response = await axios.get<TMapboxResponse>(
+      `https://api.mapbox.com/directions/v5/mapbox/driving/${coords}`,
       {
         params: {
-          key,
-          origin,
-          destination,
-          departure_time: 'now',
-          traffic_model: 'best_guess',
+          access_token: accessToken,
+          geometries: 'geojson',
+          overview: 'full',
+          steps: true,
         },
         timeout: 10000,
       }
@@ -42,7 +44,48 @@ export const googleMapsDirections = async (
 
     return response.data;
   } catch (error) {
-    console.error(`Google Maps Directions Error:`, error);
+    console.error(`Mapbox Directions Error:`, error);
+
+    throw error;
+  }
+};
+
+/**
+ *
+ * @param {string} accessToken  - Mapbox access token
+ * @param {string} address // Address
+ * @returns {Promise<[number, number]>} Geocode of given address
+ * @throws {Error} If API request fails
+ *
+ * @example
+ * const [longitude, latitude] = await geocodeAddress(
+ *  'access-token',
+ *  'Chicago, IL'
+ * );
+ */
+
+export const geocodeAddress = async (
+  accessToken: string,
+  address: string
+): Promise<[number, number]> => {
+  try {
+    const correctAddress = encodeURIComponent(address);
+
+    const response = await axios.get(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${correctAddress}.json`,
+      {
+        params: {
+          access_token: accessToken,
+          limit: 1,
+        },
+      }
+    );
+
+    const [longitude, latitude] = response?.data?.features?.[0]?.center;
+
+    return [longitude, latitude] as [number, number];
+  } catch (error) {
+    console.error(`Error when geocode geocode of ${address}:`, error);
 
     throw error;
   }
@@ -53,7 +96,7 @@ export const googleMapsDirections = async (
  *
  * @param {string} openAIApiKey - OpenAI API key
  * @param {string} prompt - Context for message generation
- * @returns {Promise<OpenAI.Chat.Completions.ChatCompletion>} Generated content
+ * @returns {Promise<String>} Generated content
  * @throws {Error} If API request fails or response is invalid
  *
  * @example
@@ -65,62 +108,39 @@ export const googleMapsDirections = async (
 export const generateFriendlyDelayMessage = async (
   openAIApiKey: string,
   prompt: string
-): Promise<OpenAI.Chat.Completions.ChatCompletion> => {
+): Promise<string> => {
   try {
-    const openai = new OpenAI({
-      apiKey: openAIApiKey,
-    });
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        max_tokens: 100,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      max_completion_tokens: 50,
-      temperature: 0.8,
-    });
-
-    return response;
+    return response?.data?.choices?.[0].message?.content;
   } catch (error) {
-    console.error('OpenAI API error:', error);
+    const errorData = JSON.stringify(
+      (error as { response: { data: unknown } }).response?.data ?? error
+    );
+    console.error('OpenAI API error:a', errorData);
 
     throw error;
-  }
-};
-
-/**
- * Sends SMS notification to the customer using Twilio API
- *
- * @param twilioSid {string}  - Twilio account SID
- * @param twilioAuthToken {string} - Twilio auth token
- * @param twilioPhoneNumber {string} - Sender phone number
- * @param phoneNumber {string} - Recipient phone number
- * @param message {string} - Message content
- * @returns {Promise<void>}
- * @throws {Error} If message sending fails
- *
- * @example
- * await sendNotificationToCustomer(
- *  'sid',
- *  'auth-token',
- *  '+98765432123',
- *  '+12345678909',
- *  'Your delivery is delayed'
- * );
- */
-export const sendNotificationToCustomer = async (
-  twilioSid: string,
-  twilioAuthToken: string,
-  twilioPhoneNumber: string,
-  phoneNumber: string,
-  message: string
-): Promise<void> => {
-  try {
-    const client = twilio(twilioSid, twilioAuthToken);
-    await client.messages.create({
-      body: message,
-      from: twilioPhoneNumber,
-      to: phoneNumber,
-    });
-  } catch (error) {
-    console.error('Twilio API error:', error);
   }
 };
