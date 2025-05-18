@@ -1,9 +1,10 @@
 // Third-Party Imports
-import { Client } from '@temporalio/client';
+import { Client, Connection } from '@temporalio/client';
 import { randomUUID } from 'crypto';
 import { config } from 'dotenv';
 
 // Core Imports
+import { TASK_QUEUE } from './core/constants';
 import type { TWorkflowInput, TWorkflowResult } from './core/types';
 import { validateEnv } from './core/utils';
 import { WorkflowInputSchema } from './core/validations';
@@ -24,18 +25,27 @@ const startWorkflow = async (
     throw new Error(errorMessage);
   }
 
-  const client = new Client();
+  const connection = await Connection.connect({
+    address: env.TEMPORAL_ADDRESS,
+    apiKey: env.TEMPORAL_API_KEY,
+    connectTimeout: '30s',
+    tls: {},
+  });
+
+  const client = new Client({
+    connection,
+    namespace: env.TEMPORAL_NAMESPACE,
+  });
+
   const workflowId = `freight-delay-${randomUUID()}-${Date.now()}`;
 
   try {
     const response = await client.workflow.start(freightDelayWorkflow, {
-      taskQueue: 'freight-delay-queue',
+      taskQueue: TASK_QUEUE,
       workflowId,
       args: [input],
     });
     const result = await response?.result();
-
-    console.log(`Workflow ${workflowId} completed`, result);
 
     return result;
   } catch (error) {
@@ -64,7 +74,7 @@ const main = async () => {
   try {
     const result = await startWorkflow(input);
 
-    console.log(`Result: ${result}`);
+    console.log('Result:', result);
   } catch (error) {
     console.error(`Workflow execution failed:`, error);
 

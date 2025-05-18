@@ -54,6 +54,11 @@ TWILIO_SID= # Required for calling Twilio API
 TWILIO_AUTH_TOKEN= # Required for calling Twilio API
 TWILIO_PHONE= # Your Twilio phone number with country code
 CUSTOMER_PHONE= # Customer's phone number with country code
+
+# Temporal Configuration
+TEMPORAL_API_KEY= # Required for using Temporal
+TEMPORAL_NAMESPACE= # Required for using Temporal
+TEMPORAL_ADDRESS= # Required for using Temporal
 ```
 
 ## 🏗️ Project Structure

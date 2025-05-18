@@ -1,6 +1,8 @@
 // Third-Party Imports
 import { Counter } from 'prom-client';
 
+export const TASK_QUEUE = 'freight-delay-queue';
+
 export const METRICS = {
   trafficApiCalls: new Counter({
     name: 'traffic_api_calls_total',

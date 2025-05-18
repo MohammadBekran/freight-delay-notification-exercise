@@ -37,4 +37,7 @@ export const EnvSchema = z.object({
   TWILIO_PHONE: z.string().regex(/^\+\d{10,15}$/, 'Invalid phone number'),
   OPENAI_API_KEY: z.string().min(1),
   DELAY_THRESHOLD: z.string().transform(Number),
+  TEMPORAL_API_KEY: z.string().min(1),
+  TEMPORAL_NAMESPACE: z.string().min(1),
+  TEMPORAL_ADDRESS: z.string().min(1),
 });

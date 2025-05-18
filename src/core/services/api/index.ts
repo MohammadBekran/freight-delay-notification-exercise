@@ -1,5 +1,5 @@
 // Third-Party Imports
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import OpenAI from 'openai';
 import twilio from 'twilio';
 
@@ -9,7 +9,7 @@ import twilio from 'twilio';
  * @param {string} key - Google Maps API key
  * @param {string} origin - Starting location
  * @param {string} destination - Ending location
- * @returns {Promise<TTrafficResponse>}  Duration and distance information
+ * @returns {Promise<AxiosResponse>}  Duration and distance information
  * @throws {Error} if API request fails or response is invalid
  *
  * @example
@@ -24,10 +24,10 @@ export const googleMapsDirections = async (
   key: string,
   origin: string,
   destination: string
-) => {
+): Promise<AxiosResponse> => {
   try {
     const response = await axios.get(
-      'maps.googleapis.com/maps/api/directions/json',
+      'https://maps.googleapis.com/maps/api/directions/json',
       {
         params: {
           key,
